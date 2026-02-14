@@ -23,14 +23,21 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
 
+      - name: Ensure target directory exists on EC2
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_HOST \
+            "mkdir -p /home/ubuntu/${{ github.event.repository.name }}"
+
       - name: Copy project to EC2
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
-
         run: |
           scp -i ~/.ssh/id_rsa -r ./ \
-            $SERVER_USER@$SERVER_HOST:/home/ubuntu/${{ github.repository }}
+            $SERVER_USER@$SERVER_HOST:/home/ubuntu/${{ github.event.repository.name }}
 
       - name: Install dependencies and run app on EC2
         env:
@@ -38,7 +45,7 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
           ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_HOST << 'EOF'
-            cd /home/ubuntu/${{ github.repository }}
+            cd /home/ubuntu/${{ github.event.repository.name }}
             python3 -m venv venv
             venv/bin/pip install --upgrade pip
             venv/bin/pip install -r requirements.txt
