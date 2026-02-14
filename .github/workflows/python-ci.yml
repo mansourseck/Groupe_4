@@ -15,32 +15,32 @@ jobs:
 
       - name: Setup SSH
         env:
-          EC2_SSH_KEY: ${{ vars.EC2_SSH_KEY }}
-          EC2_HOST: ${{ vars.EC2_HOST }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
           mkdir -p ~/.ssh
-          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+          echo "$SERVER_SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+          ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
 
       - name: Copy project to EC2
         env:
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
 
         run: |
           scp -i ~/.ssh/id_rsa -r ./ \
-            $EC2_USER@$EC2_HOST:/home/ubuntu/${{ github.repository }}
+            $SERVER_USER@$SERVER_HOST:/home/ubuntu/${{ github.repository }}
 
       - name: Install dependencies and run app on EC2
         env:
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
-          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST << 'EOF'
+          ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_HOST << 'EOF'
             cd /home/ubuntu/${{ github.repository }}
             python3 -m venv venv
             venv/bin/pip install --upgrade pip
             venv/bin/pip install -r requirements.txt
-            nohup venv/bin/python run.py > app.log 2>&1 &
+            nohup venv/bin/python app.py > app.log 2>&1 &
           EOF
