@@ -29,7 +29,7 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
           ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_HOST \
-            "mkdir -p /home/ubuntu/${{ github.event.repository.name }}"
+            "mkdir -p /home/ubuntu/APPLICATIONS"
 
       - name: Copy project to EC2
         env:
@@ -37,7 +37,7 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
           scp -i ~/.ssh/id_rsa -r ./ \
-            $SERVER_USER@$SERVER_HOST:/home/ubuntu/${{ github.event.repository.name }}
+            $SERVER_USER@$SERVER_HOST:/home/ubuntu/APPLICATIONS
 
       - name: Install dependencies and run app on EC2
         env:
@@ -45,7 +45,7 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
         run: |
           ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_HOST << 'EOF'
-            cd /home/ubuntu/${{ github.event.repository.name }}
+            cd /home/ubuntu/APPLICATIONS
             python3 -m venv venv
             venv/bin/pip install --upgrade pip
             venv/bin/pip install -r requirements.txt
