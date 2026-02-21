@@ -46,8 +46,6 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_HOST << 'EOF'
             cd /home/ubuntu/APPLICATIONS
-            python3 -m venv venv
-            venv/bin/pip install --upgrade pip
-            venv/bin/pip install -r requirements.txt
+
             nohup venv/bin/python app.py > app.log 2>&1 &
           EOF
